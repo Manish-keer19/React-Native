@@ -10,10 +10,13 @@ const Stack = createStackNavigator();
 export default function App() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
+      <Stack.Navigator
+        initialRouteName="Home"
+        screenOptions={{ headerShown: false }} // Use headerShown: false to hide the header globally
+      >
         <Stack.Screen name="Home" component={HomePage} />
         <Stack.Screen name="Details" component={DetailsScreen} />
-        <Stack.Screen  name="Hello" component={Hello}/>
+        <Stack.Screen name="Hello" component={Hello} />
       </Stack.Navigator>
     </NavigationContainer>
   );
