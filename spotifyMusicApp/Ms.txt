@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { View, TouchableOpacity, Text, StyleSheet, Image } from "react-native";
+import {
+  View,
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  Image,
+  FlatList,
+} from "react-native";
 import { Audio } from "expo-av";
 import { MaterialIcons } from "@expo/vector-icons";
-
-// Define the type for the Sound object
-type SoundObject = Audio.Sound | undefined;
+import Slider from "@react-native-community/slider"; // For Seek Bar
 
 // Define the array of tracks with audio, image, and title
-const tracks: { audio: number; image: number; title: string }[] = [
+const tracks = [
   {
     audio: require("./assets/audio/ms1.mp3"),
     image: require("./assets/images/1.jpg"),
@@ -39,50 +44,89 @@ const tracks: { audio: number; image: number; title: string }[] = [
   {
     audio: require("./assets/audio/ms6.mp3"),
     image: require("./assets/images/6.jpg"),
-    title: "GOAT (Full Video) - Sidhu Moose Wala, Wazir Patar, Sukh Sanghera",
+    title:
+      "Khairiyat (Bonus Track) - Chhichhore, Sushant, Shraddha, Pritam, Amitabh B, Arijit Singh",
   },
   {
     audio: require("./assets/audio/ms7.mp3"),
     image: require("./assets/images/7.jpg"),
-    title: "Guilty (Slowed Reverb) - Inder Chahal, Karan Aujla",
+    title:
+      "Khairiyat (Bonus Track) - Chhichhore, Sushant, Shraddha, Pritam, Amitabh B, Arijit Singh",
   },
   {
     audio: require("./assets/audio/ms8.mp3"),
     image: require("./assets/images/8.jpg"),
-    title: "GOAT (Full Video) - Sidhu Moose Wala, Wazir Patar, Sukh Sanghera",
+    title:
+      "Khairiyat (Bonus Track) - Chhichhore, Sushant, Shraddha, Pritam, Amitabh B, Arijit Singh",
   },
   {
     audio: require("./assets/audio/ms9.mp3"),
     image: require("./assets/images/9.jpg"),
-    title: "GOAT (Full Video) - Sidhu Moose Wala, Wazir Patar, Sukh Sanghera",
+    title:
+      "Khairiyat (Bonus Track) - Chhichhore, Sushant, Shraddha, Pritam, Amitabh B, Arijit Singh",
   },
   {
     audio: require("./assets/audio/ms10.mp3"),
     image: require("./assets/images/10.jpg"),
-    title: "GOAT (Full Video) - Sidhu Moose Wala, Wazir Patar, Sukh Sanghera",
+    title:
+      "Khairiyat (Bonus Track) - Chhichhore, Sushant, Shraddha, Pritam, Amitabh B, Arijit Singh",
   },
 ];
 
 export default function App() {
-  const [sound, setSound] = useState<SoundObject>(undefined);
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [currentTrackIndex, setCurrentTrackIndex] = useState<number>(0);
+  const [Musics, setMusics] = useState<any[]>([]); // State to hold preloaded sounds
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+  const [sound, setSound] = useState<Audio.Sound | null>(null);
+  const [positionMillis, setPositionMillis] = useState(0); // Current position in milliseconds
+  const [durationMillis, setDurationMillis] = useState(0); // Total duration of the track in milliseconds
 
-  const playSound = async (): Promise<void> => {
+  // Function to load all tracks and store them in the state
+  const loadMusics = async () => {
     try {
-      const { sound } = await Audio.Sound.createAsync(
-        tracks[currentTrackIndex].audio
+      const loadedMusics = await Promise.all(
+        tracks.map(async (item) => {
+          const { sound } = await Audio.Sound.createAsync(item.audio);
+          return {
+            sound,
+            ...item,
+          };
+        })
       );
-      console.log("sound data is ", sound);
-      setSound(sound);
-      await sound.playAsync();
-      setIsPlaying(true);
+      setMusics(loadedMusics);
     } catch (error) {
-      console.error("Error playing sound:", error);
+      console.error("Error loading sounds:", error);
     }
   };
 
-  const pauseSound = async (): Promise<void> => {
+  // Function to play a track by index
+  const playSound = async (index: number) => {
+    if (Musics[index]) {
+      try {
+        if (sound) {
+          await sound.unloadAsync(); // Unload previous sound
+        }
+        const newSound = Musics[index].sound;
+        setSound(newSound);
+        setCurrentTrackIndex(index);
+        const status = await newSound.playAsync();
+        setIsPlaying(true);
+        setDurationMillis(status.durationMillis || 0);
+
+        // Track the position of the track
+        newSound.setOnPlaybackStatusUpdate((playbackStatus: any) => {
+          if (playbackStatus.isLoaded && playbackStatus.isPlaying) {
+            setPositionMillis(playbackStatus.positionMillis);
+            setDurationMillis(playbackStatus.durationMillis);
+          }
+        });
+      } catch (error) {
+        console.error("Error playing sound:", error);
+      }
+    }
+  };
+
+  const pauseSound = async () => {
     if (sound) {
       try {
         await sound.pauseAsync();
@@ -93,32 +137,30 @@ export default function App() {
     }
   };
 
-  const nextTrack = async (): Promise<void> => {
-    if (sound) {
-      try {
-        await sound.unloadAsync();
-      } catch (error) {
-        console.error("Error unloading sound:", error);
-      }
-    }
-    const nextIndex = (currentTrackIndex + 1) % tracks.length;
-    setCurrentTrackIndex(nextIndex);
-    await playSound();
+  const nextTrack = async () => {
+    const nextIndex = (currentTrackIndex + 1) % Musics.length;
+    await playSound(nextIndex);
   };
 
-  const previousTrack = async (): Promise<void> => {
+  const previousTrack = async () => {
+    const previousIndex =
+      (currentTrackIndex - 1 + Musics.length) % Musics.length;
+    await playSound(previousIndex);
+  };
+
+  const seekTrack = async (value: number) => {
     if (sound) {
       try {
-        await sound.unloadAsync();
+        await sound.setPositionAsync(value);
       } catch (error) {
-        console.error("Error unloading sound:", error);
+        console.error("Error seeking track:", error);
       }
     }
-    const previousIndex =
-      (currentTrackIndex - 1 + tracks.length) % tracks.length;
-    setCurrentTrackIndex(previousIndex);
-    await playSound();
   };
+
+  useEffect(() => {
+    loadMusics(); // Load all music files on component mount
+  }, []);
 
   useEffect(() => {
     return sound
@@ -130,31 +172,84 @@ export default function App() {
       : undefined;
   }, [sound]);
 
+  const formatTime = (millis: number) => {
+    const minutes = Math.floor(millis / 60000);
+    const seconds = Math.floor((millis % 60000) / 1000);
+    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+  };
+
   return (
     <View style={styles.container}>
-      {/* Album Artwork Section */}
-      <Image
-        source={tracks[currentTrackIndex].image}
-        style={styles.albumArt}
-        resizeMode="cover"
-      />
-      {/* Song Title Section */}
-      <Text style={styles.songTitle}>{tracks[currentTrackIndex].title}</Text>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity onPress={nextTrack}>
-          <MaterialIcons name="skip-next" size={60} color="#FF6F61" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={isPlaying ? pauseSound : playSound}>
-          <MaterialIcons
-            name={isPlaying ? "pause" : "play-arrow"}
-            size={60}
-            color="#FF6F61"
+      {Musics.length > 0 && (
+        <>
+          {/* Album Artwork and Song Title Section */}
+          <Image
+            source={Musics[currentTrackIndex].image}
+            style={styles.albumArt}
+            resizeMode="cover"
           />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={previousTrack}>
-          <MaterialIcons name="skip-previous" size={60} color="#FF6F61" />
-        </TouchableOpacity>
-      </View>
+          <Text style={styles.songTitle}>
+            {Musics[currentTrackIndex].title}
+          </Text>
+
+          {/* Seek Bar */}
+          <Slider
+            style={styles.slider}
+            minimumValue={0}
+            maximumValue={durationMillis || 1} // Avoid division by zero
+            value={positionMillis}
+            onSlidingComplete={seekTrack} // Seek to the new position
+            minimumTrackTintColor="#FF6F61"
+            maximumTrackTintColor="#FFFFFF"
+            thumbTintColor="#FF6F61"
+          />
+
+          {/* Time Display */}
+          <View style={styles.timeContainer}>
+            <Text style={styles.timeText}>{formatTime(positionMillis)}</Text>
+            <Text style={styles.timeText}>
+              {formatTime(durationMillis - positionMillis)}
+            </Text>
+          </View>
+
+          {/* Playback Controls */}
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity onPress={previousTrack}>
+              <MaterialIcons name="skip-previous" size={60} color="white" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={
+                isPlaying ? pauseSound : () => playSound(currentTrackIndex)
+              }
+            >
+              <MaterialIcons
+                name={isPlaying ? "pause" : "play-arrow"}
+                size={60}
+                color="white"
+              />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={nextTrack}>
+              <MaterialIcons name="skip-next" size={60} color="white" />
+            </TouchableOpacity>
+          </View>
+
+          {/* Display all tracks in a list */}
+          <FlatList
+            data={Musics}
+            keyExtractor={(_, index) => index.toString()}
+            renderItem={({ item, index }) => (
+              <TouchableOpacity
+                onPress={() => playSound(index)}
+                style={styles.trackItem}
+              >
+                <Image source={item.image} style={styles.trackImage} />
+                <Text style={styles.trackTitle}>{item.title}</Text>
+              </TouchableOpacity>
+            )}
+            style={styles.trackList}
+          />
+        </>
+      )}
     </View>
   );
 }
@@ -165,7 +260,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#282C34", // Dark background
+    backgroundColor: "#282C34",
     padding: 20,
   },
   albumArt: {
@@ -173,22 +268,61 @@ const styles = StyleSheet.create({
     height: 300,
     borderRadius: 15,
     marginBottom: 20,
-    borderColor: "#FF6F61", // Border color matching the theme
+    borderColor: "#FF6F61",
     borderWidth: 2,
   },
   songTitle: {
     fontSize: 22,
     fontWeight: "600",
-    color: "#FFFFFF", // White text for better visibility
-    textAlign: "center", // Center the text
+    color: "#FFFFFF",
+    textAlign: "center",
     marginBottom: 20,
-    paddingHorizontal: 10, // Padding for nicer spacing
-    textTransform: "capitalize", // Capitalize song titles
+    paddingHorizontal: 10,
+    textTransform: "capitalize",
   },
   buttonContainer: {
     flexDirection: "row",
     justifyContent: "space-around",
     width: "100%",
     maxWidth: 400,
+    marginBottom: 20,
+  },
+  slider: {
+    width: "100%",
+    height: 40,
+  },
+  timeContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    maxWidth: 400,
+    marginBottom: 20,
+  },
+  timeText: {
+    color: "#FFF",
+    fontSize: 16,
+  },
+  trackList: {
+    marginTop: 20,
+    width: "100%",
+  },
+  trackItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10,
+    backgroundColor: "#333",
+    marginBottom: 10,
+    borderRadius: 10,
+  },
+  trackImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 5,
+    marginRight: 10,
+  },
+  trackTitle: {
+    color: "#FFF",
+    fontSize: 16,
+    flexShrink: 1,
   },
 });

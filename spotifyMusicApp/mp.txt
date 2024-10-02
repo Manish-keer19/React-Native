@@ -1,29 +1,19 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  TouchableOpacity,
-  Text,
-  StyleSheet,
-  Image,
-  FlatList,
-} from "react-native";
+import { View, TouchableOpacity, Text, StyleSheet, Image, FlatList } from "react-native";
 import { Audio } from "expo-av";
 import { MaterialIcons } from "@expo/vector-icons";
-import Slider from "@react-native-community/slider"; // For Seek Bar
 
 // Define the array of tracks with audio, image, and title
 const tracks = [
   {
     audio: require("./assets/audio/ms1.mp3"),
     image: require("./assets/images/1.jpg"),
-    title:
-      "Ek Dilruba Hai (Slowed & Reverb) - Udit Narayan, Akshay Kumar, Kareena",
+    title: "Ek Dilruba Hai (Slowed & Reverb) - Udit Narayan, Akshay Kumar, Kareena",
   },
   {
     audio: require("./assets/audio/ms2.mp3"),
     image: require("./assets/images/2.jpg"),
-    title:
-      "Falak Tak Chal Sath Mere (Slowed + Reverb) - Udit Narayan, Mahalaxmi Iyer",
+    title: "Falak Tak Chal Sath Mere (Slowed + Reverb) - Udit Narayan, Mahalaxmi Iyer",
   },
   {
     audio: require("./assets/audio/ms3.mp3"),
@@ -38,38 +28,7 @@ const tracks = [
   {
     audio: require("./assets/audio/ms5.mp3"),
     image: require("./assets/images/5.jpg"),
-    title:
-      "Khairiyat (Bonus Track) - Chhichhore, Sushant, Shraddha, Pritam, Amitabh B, Arijit Singh",
-  },
-  {
-    audio: require("./assets/audio/ms6.mp3"),
-    image: require("./assets/images/6.jpg"),
-    title:
-      "Khairiyat (Bonus Track) - Chhichhore, Sushant, Shraddha, Pritam, Amitabh B, Arijit Singh",
-  },
-  {
-    audio: require("./assets/audio/ms7.mp3"),
-    image: require("./assets/images/7.jpg"),
-    title:
-      "Khairiyat (Bonus Track) - Chhichhore, Sushant, Shraddha, Pritam, Amitabh B, Arijit Singh",
-  },
-  {
-    audio: require("./assets/audio/ms8.mp3"),
-    image: require("./assets/images/8.jpg"),
-    title:
-      "Khairiyat (Bonus Track) - Chhichhore, Sushant, Shraddha, Pritam, Amitabh B, Arijit Singh",
-  },
-  {
-    audio: require("./assets/audio/ms9.mp3"),
-    image: require("./assets/images/9.jpg"),
-    title:
-      "Khairiyat (Bonus Track) - Chhichhore, Sushant, Shraddha, Pritam, Amitabh B, Arijit Singh",
-  },
-  {
-    audio: require("./assets/audio/ms10.mp3"),
-    image: require("./assets/images/10.jpg"),
-    title:
-      "Khairiyat (Bonus Track) - Chhichhore, Sushant, Shraddha, Pritam, Amitabh B, Arijit Singh",
+    title: "Khairiyat (Bonus Track) - Chhichhore, Sushant, Shraddha, Pritam, Amitabh B, Arijit Singh",
   },
 ];
 
@@ -78,8 +37,6 @@ export default function App() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [sound, setSound] = useState<Audio.Sound | null>(null);
-  const [positionMillis, setPositionMillis] = useState(0); // Current position in milliseconds
-  const [durationMillis, setDurationMillis] = useState(0); // Total duration of the track in milliseconds
 
   // Function to load all tracks and store them in the state
   const loadMusics = async () => {
@@ -109,17 +66,8 @@ export default function App() {
         const newSound = Musics[index].sound;
         setSound(newSound);
         setCurrentTrackIndex(index);
-        const status = await newSound.playAsync();
+        await newSound.playAsync();
         setIsPlaying(true);
-        setDurationMillis(status.durationMillis || 0);
-
-        // Track the position of the track
-        newSound.setOnPlaybackStatusUpdate((playbackStatus: any) => {
-          if (playbackStatus.isLoaded && playbackStatus.isPlaying) {
-            setPositionMillis(playbackStatus.positionMillis);
-            setDurationMillis(playbackStatus.durationMillis);
-          }
-        });
       } catch (error) {
         console.error("Error playing sound:", error);
       }
@@ -143,19 +91,8 @@ export default function App() {
   };
 
   const previousTrack = async () => {
-    const previousIndex =
-      (currentTrackIndex - 1 + Musics.length) % Musics.length;
+    const previousIndex = (currentTrackIndex - 1 + Musics.length) % Musics.length;
     await playSound(previousIndex);
-  };
-
-  const seekTrack = async (value: number) => {
-    if (sound) {
-      try {
-        await sound.setPositionAsync(value);
-      } catch (error) {
-        console.error("Error seeking track:", error);
-      }
-    }
   };
 
   useEffect(() => {
@@ -172,12 +109,6 @@ export default function App() {
       : undefined;
   }, [sound]);
 
-  const formatTime = (millis: number) => {
-    const minutes = Math.floor(millis / 60000);
-    const seconds = Math.floor((millis % 60000) / 1000);
-    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
-  };
-
   return (
     <View style={styles.container}>
       {Musics.length > 0 && (
@@ -188,40 +119,14 @@ export default function App() {
             style={styles.albumArt}
             resizeMode="cover"
           />
-          <Text style={styles.songTitle}>
-            {Musics[currentTrackIndex].title}
-          </Text>
-
-          {/* Seek Bar */}
-          <Slider
-            style={styles.slider}
-            minimumValue={0}
-            maximumValue={durationMillis || 1} // Avoid division by zero
-            value={positionMillis}
-            onSlidingComplete={seekTrack} // Seek to the new position
-            minimumTrackTintColor="#FF6F61"
-            maximumTrackTintColor="#FFFFFF"
-            thumbTintColor="#FF6F61"
-          />
-
-          {/* Time Display */}
-          <View style={styles.timeContainer}>
-            <Text style={styles.timeText}>{formatTime(positionMillis)}</Text>
-            <Text style={styles.timeText}>
-              {formatTime(durationMillis - positionMillis)}
-            </Text>
-          </View>
+          <Text style={styles.songTitle}>{Musics[currentTrackIndex].title}</Text>
 
           {/* Playback Controls */}
           <View style={styles.buttonContainer}>
             <TouchableOpacity onPress={previousTrack}>
               <MaterialIcons name="skip-previous" size={60} color="white" />
             </TouchableOpacity>
-            <TouchableOpacity
-              onPress={
-                isPlaying ? pauseSound : () => playSound(currentTrackIndex)
-              }
-            >
+            <TouchableOpacity onPress={isPlaying ? pauseSound : () => playSound(currentTrackIndex)}>
               <MaterialIcons
                 name={isPlaying ? "pause" : "play-arrow"}
                 size={60}
@@ -238,10 +143,7 @@ export default function App() {
             data={Musics}
             keyExtractor={(_, index) => index.toString()}
             renderItem={({ item, index }) => (
-              <TouchableOpacity
-                onPress={() => playSound(index)}
-                style={styles.trackItem}
-              >
+              <TouchableOpacity onPress={() => playSound(index)} style={styles.trackItem}>
                 <Image source={item.image} style={styles.trackImage} />
                 <Text style={styles.trackTitle}>{item.title}</Text>
               </TouchableOpacity>
@@ -286,21 +188,6 @@ const styles = StyleSheet.create({
     width: "100%",
     maxWidth: 400,
     marginBottom: 20,
-  },
-  slider: {
-    width: "100%",
-    height: 40,
-  },
-  timeContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-    maxWidth: 400,
-    marginBottom: 20,
-  },
-  timeText: {
-    color: "#FFF",
-    fontSize: 16,
   },
   trackList: {
     marginTop: 20,
