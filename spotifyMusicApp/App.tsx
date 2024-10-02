@@ -184,7 +184,8 @@ export default function App() {
         <>
           {/* Album Artwork and Song Title Section */}
           <Image
-            source={Musics[currentTrackIndex].image}
+            source={require("./assets/images/manish.jpg")}
+            // source={Musics[currentTrackIndex].image}
             style={styles.albumArt}
             resizeMode="cover"
           />
@@ -242,7 +243,10 @@ export default function App() {
                 onPress={() => playSound(index)}
                 style={styles.trackItem}
               >
-                <Image source={item.image} style={styles.trackImage} />
+                <Image 
+                // source={item.image}
+                source={require("./assets/images/manish.jpg")}
+                 style={styles.trackImage} />
                 <Text style={styles.trackTitle}>{item.title}</Text>
               </TouchableOpacity>
             )}
