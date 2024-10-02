@@ -71,6 +71,68 @@ const tracks = [
     title:
       "Khairiyat (Bonus Track) - Chhichhore, Sushant, Shraddha, Pritam, Amitabh B, Arijit Singh",
   },
+  {
+    audio: require("./assets/audio/1.mp3"),
+    image: require("./assets/images/10.jpg"),
+    title:
+      "Khairiyat (Bonus Track) - Chhichhore, Sushant, Shraddha, Pritam, Amitabh B, Arijit Singh",
+  },
+  {
+    audio: require("./assets/audio/2.mp3"),
+    image: require("./assets/images/10.jpg"),
+    title:
+      "Khairiyat (Bonus Track) - Chhichhore, Sushant, Shraddha, Pritam, Amitabh B, Arijit Singh",
+  },
+  {
+    audio: require("./assets/audio/3.mp3"),
+    image: require("./assets/images/10.jpg"),
+    title:
+      "Khairiyat (Bonus Track) - Chhichhore, Sushant, Shraddha, Pritam, Amitabh B, Arijit Singh",
+  },
+  {
+    audio: require("./assets/audio/4.mp3"),
+    image: require("./assets/images/10.jpg"),
+    title:
+      "Khairiyat (Bonus Track) - Chhichhore, Sushant, Shraddha, Pritam, Amitabh B, Arijit Singh",
+  },
+  {
+    audio: require("./assets/audio/5.mp3"),
+    image: require("./assets/images/10.jpg"),
+    title:
+      "Khairiyat (Bonus Track) - Chhichhore, Sushant, Shraddha, Pritam, Amitabh B, Arijit Singh",
+  },
+  {
+    audio: require("./assets/audio/6.mp3"),
+    image: require("./assets/images/10.jpg"),
+    title:
+      "Khairiyat (Bonus Track) - Chhichhore, Sushant, Shraddha, Pritam, Amitabh B, Arijit Singh",
+  },
+  {
+    audio: require("./assets/audio/7.mp3"),
+    image: require("./assets/images/10.jpg"),
+    title:
+      "Khairiyat (Bonus Track) - Chhichhore, Sushant, Shraddha, Pritam, Amitabh B, Arijit Singh",
+  },
+  {
+    audio: require("./assets/audio/8.mp3"),
+    image: require("./assets/images/10.jpg"),
+    title:
+      "Khairiyat (Bonus Track) - Chhichhore, Sushant, Shraddha, Pritam, Amitabh B, Arijit Singh",
+  },
+  {
+    audio: require("./assets/audio/9.mp3"),
+    image: require("./assets/images/10.jpg"),
+    title:
+      "Khairiyat (Bonus Track) - Chhichhore, Sushant, Shraddha, Pritam, Amitabh B, Arijit Singh",
+  },
+  {
+    audio: require("./assets/audio/10.mp3"),
+    image: require("./assets/images/10.jpg"),
+    title:
+      "Khairiyat (Bonus Track) - Chhichhore, Sushant, Shraddha, Pritam, Amitabh B, Arijit Singh",
+  },
+ 
+ 
 ];
 
 export default function App() {
@@ -185,6 +247,7 @@ export default function App() {
           {/* Album Artwork and Song Title Section */}
           <Image
             source={require("./assets/images/manish.jpg")}
+            // source={require("./assets/images/s.jpg")}
             // source={Musics[currentTrackIndex].image}
             style={styles.albumArt}
             resizeMode="cover"
@@ -243,10 +306,11 @@ export default function App() {
                 onPress={() => playSound(index)}
                 style={styles.trackItem}
               >
-                <Image 
-                // source={item.image}
-                source={require("./assets/images/manish.jpg")}
-                 style={styles.trackImage} />
+                <Image
+                  // source={item.image}
+                  source={require("./assets/images/manish.jpg")}
+                  style={styles.trackImage}
+                />
                 <Text style={styles.trackTitle}>{item.title}</Text>
               </TouchableOpacity>
             )}
