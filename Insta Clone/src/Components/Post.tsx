@@ -1,13 +1,20 @@
-import { StyleSheet, Text, View, Image, ScrollView, Pressable } from "react-native";
-import React, { useState } from "react";
-
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  ScrollView,
+  Pressable,
+  TextInput,
+  Animated,
+} from "react-native";
+import React, { useState, useRef } from "react";
 import EntypoIcon from "react-native-vector-icons/Entypo";
 import AntDesignIcon from "react-native-vector-icons/AntDesign";
 import OcticonsIcons from "react-native-vector-icons/Octicons";
 import FeatherIcons from "react-native-vector-icons/Feather";
 
 export default function Post() {
-  // Sample data for each post (this can be dynamic in a real app)
   const [posts, setPosts] = useState(
     [...Array(20)].map(() => ({
       likes: 120,
@@ -15,22 +22,51 @@ export default function Post() {
       comments: 15,
       liked: false,
       saved: false,
+      userComment: "",
     }))
   );
 
-  // Function to toggle like for a post
-  const toggleLike = (index:number) => {
+  const animatedValues = useRef(posts.map(() => new Animated.Value(1))).current;
+
+  const toggleLike = (index: number) => {
     const updatedPosts = [...posts];
     updatedPosts[index].liked = !updatedPosts[index].liked;
     updatedPosts[index].likes += updatedPosts[index].liked ? 1 : -1;
     setPosts(updatedPosts);
+
+    // Animate the like button
+    Animated.timing(animatedValues[index], {
+      toValue: 1.2,
+      duration: 150,
+      useNativeDriver: true,
+    }).start(() => {
+      Animated.timing(animatedValues[index], {
+        toValue: 1,
+        duration: 150,
+        useNativeDriver: true,
+      }).start();
+    });
   };
 
-  // Function to toggle bookmark for a post
-  const toggleSave = (index:number) => {
+  const toggleSave = (index: number) => {
     const updatedPosts = [...posts];
     updatedPosts[index].saved = !updatedPosts[index].saved;
     setPosts(updatedPosts);
+  };
+
+  const handleCommentChange = (text: string, index: number) => {
+    const updatedPosts = [...posts];
+    updatedPosts[index].userComment = text;
+    setPosts(updatedPosts);
+  };
+
+  const submitComment = (index: number) => {
+    const updatedPosts = [...posts];
+    if (updatedPosts[index].userComment) {
+      updatedPosts[index].comments += 1;
+      updatedPosts[index].userComment = "";
+      setPosts(updatedPosts);
+    }
   };
 
   return (
@@ -66,13 +102,20 @@ export default function Post() {
             <View style={styles.leftIcons}>
               <Pressable
                 onPress={() => toggleLike(i)}
-                style={({ pressed }) => [{ opacity: pressed ? 0.1 : 1 }]}
+                style={({ pressed }) => [
+                  { opacity: pressed ? 0.9 : 1 },
+                //   styles.iconButton,
+                ]}
               >
-                <AntDesignIcon
-                  name={post.liked ? "heart" : "hearto"}
-                  color={post.liked ? "red" : "white"}
-                  size={24}
-                />
+                <Animated.View
+                  style={{ transform: [{ scale: animatedValues[i] }] }}
+                >
+                  <AntDesignIcon
+                    name={post.liked ? "heart" : "hearto"}
+                    color={post.liked ? "red" : "white"}
+                    size={24}
+                  />
+                </Animated.View>
               </Pressable>
 
               <Pressable
@@ -109,6 +152,18 @@ export default function Post() {
           {/* Comment Count */}
           <Text style={styles.commentCount}>{post.comments} comments</Text>
 
+          {/* Comment Input */}
+          <View style={styles.commentInputWrapper}>
+            <TextInput
+              style={styles.commentInput}
+              placeholder="Add a comment..."
+              placeholderTextColor="gray"
+              value={post.userComment}
+              onChangeText={(text) => handleCommentChange(text, i)}
+              onSubmitEditing={() => submitComment(i)}
+            />
+          </View>
+
           {/* Post Description */}
           <Text style={styles.postDescription}>
             <Text style={styles.username}>Manish keer </Text>
@@ -127,6 +182,9 @@ const styles = StyleSheet.create({
   },
   postContainer: {
     marginBottom: 20,
+    borderRadius: 10,
+    overflow: "hidden",
+    backgroundColor: "#1a1a1a", // Slightly lighter background for the post
   },
   postHeader: {
     flexDirection: "row",
@@ -179,6 +237,17 @@ const styles = StyleSheet.create({
     color: "white",
     paddingHorizontal: 10,
     marginTop: 5,
+  },
+  commentInputWrapper: {
+    padding: 10,
+    //   borderTopWidth: 1,
+    //   borderTopColor: "gray",
+  },
+  commentInput: {
+    //   backgroundColor: "#2a2a2a",
+    color: "white",
+    padding: 10,
+    borderRadius: 5,
   },
   postDescription: {
     color: "white",

@@ -244,3 +244,17 @@ const styles = StyleSheet.create({
     padding: 10,
   },
 });
+
+
+
+.........................
+
+
+<View style={styles.imageContainer}>
+              <Image
+                style={styles.image}
+                source={{
+                  uri: "https://res.cloudinary.com/manish19/image/upload/v1726506341/ftedkmcuqzwy97jwjdqu.jpg",
+                }}
+              />
+            </View>
