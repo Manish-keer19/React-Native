@@ -22,7 +22,18 @@ export default function Story() {
                   }}
                 />
               </View>
-                <Icon name="pluscircleo" size={30}  color={"white"} style={{position:"absolute", right:14,top:82, backgroundColor:"blue",borderRadius:50}} />
+              <Icon
+                name="pluscircleo"
+                size={30}
+                color={"white"}
+                style={{
+                  position: "absolute",
+                  right: 14,
+                  top: 82,
+                  backgroundColor: "blue",
+                  borderRadius: 50,
+                }}
+              />
               <Text style={styles.text}>Manish Kumar </Text>
             </View>
           ) : (

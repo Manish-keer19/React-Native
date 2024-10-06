@@ -7,6 +7,7 @@ import {
   Pressable,
   TextInput,
   Animated,
+  Keyboard,
 } from "react-native";
 import React, { useState, useRef } from "react";
 import EntypoIcon from "react-native-vector-icons/Entypo";
@@ -14,8 +15,17 @@ import AntDesignIcon from "react-native-vector-icons/AntDesign";
 import OcticonsIcons from "react-native-vector-icons/Octicons";
 import FeatherIcons from "react-native-vector-icons/Feather";
 
+interface PostData {
+  likes: number;
+  views: number;
+  comments: number;
+  liked: boolean;
+  saved: boolean;
+  userComment: string;
+}
+
 export default function Post() {
-  const [posts, setPosts] = useState(
+  const [posts, setPosts] = useState<PostData[]>(
     [...Array(20)].map(() => ({
       likes: 120,
       views: 350,
@@ -62,10 +72,11 @@ export default function Post() {
 
   const submitComment = (index: number) => {
     const updatedPosts = [...posts];
-    if (updatedPosts[index].userComment) {
+    if (updatedPosts[index].userComment.trim()) {
       updatedPosts[index].comments += 1;
       updatedPosts[index].userComment = "";
       setPosts(updatedPosts);
+      Keyboard.dismiss(); // Close the keyboard after submitting
     }
   };
 
@@ -92,7 +103,8 @@ export default function Post() {
             <Image
               style={styles.postImage}
               source={{
-                uri: "https://res.cloudinary.com/manish19/image/upload/v1726593608/lkiq9xru9jzd1lrd4b7m.jpg",
+                // uri: "https://res.cloudinary.com/manish19/image/upload/v1726593608/lkiq9xru9jzd1lrd4b7m.jpg",
+                uri: "https://res.cloudinary.com/manish19/image/upload/v1726505860/huur9oubvhlwi9sqw0go.jpg",
               }}
             />
           </View>
@@ -102,10 +114,7 @@ export default function Post() {
             <View style={styles.leftIcons}>
               <Pressable
                 onPress={() => toggleLike(i)}
-                style={({ pressed }) => [
-                  { opacity: pressed ? 0.9 : 1 },
-                //   styles.iconButton,
-                ]}
+                style={({ pressed }) => [{ opacity: pressed ? 0.9 : 1 }]}
               >
                 <Animated.View
                   style={{ transform: [{ scale: animatedValues[i] }] }}
@@ -178,13 +187,18 @@ export default function Post() {
 const styles = StyleSheet.create({
   postWrapper: {
     flex: 1,
-    backgroundColor: "#000", // Black background for Instagram-like look
+    backgroundColor: "black", // Black background for Instagram-like look
   },
   postContainer: {
     marginBottom: 20,
     borderRadius: 10,
     overflow: "hidden",
-    backgroundColor: "#1a1a1a", // Slightly lighter background for the post
+    backgroundColor: "black", // Slightly lighter background for the post
+    shadowColor: "#000", // Shadow for depth effect
+    shadowOpacity: 0.8,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 5, // Shadow for Android
   },
   postHeader: {
     flexDirection: "row",
@@ -240,14 +254,12 @@ const styles = StyleSheet.create({
   },
   commentInputWrapper: {
     padding: 10,
-    //   borderTopWidth: 1,
-    //   borderTopColor: "gray",
   },
   commentInput: {
-    //   backgroundColor: "#2a2a2a",
     color: "white",
     padding: 10,
     borderRadius: 5,
+    backgroundColor: "#333", // Dark background for input
   },
   postDescription: {
     color: "white",
