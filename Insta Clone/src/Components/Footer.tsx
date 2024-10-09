@@ -41,6 +41,9 @@ const styles = StyleSheet.create({
     backgroundColor: "black",
     borderTopWidth: 1,
     borderTopColor: "pink",
+    position: "absolute",
+    bottom: 0,
+    width: "100%",
   },
 });
 

@@ -1,24 +1,96 @@
-import React from "react";
-import { StyleSheet, Text, View, Image, TouchableOpacity, FlatList } from "react-native";
+import React, { useState } from "react";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  TouchableOpacity,
+  FlatList,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import EntypoIcons from "@expo/vector-icons/Entypo";
 import Footer from "../Footer";
+import { useNavigation } from "@react-navigation/native";
+import { RootStackParamList } from "../../../App";
+import { NavigationProp } from "@react-navigation/native";
+import { useSelector } from "react-redux";
 
-// Dummy data for posts
+// Dummy data for posts and reels
 const posts = [
-  { id: '1', image: 'https://res.cloudinary.com/manish19/image/upload/v1726505860/huur9oubvhlwi9sqw0go.jpg' },
-  { id: '2', image: 'https://res.cloudinary.com/manish19/image/upload/v1726505860/huur9oubvhlwi9sqw0go.jpg' },
-  { id: '3', image: 'https://res.cloudinary.com/manish19/image/upload/v1726505860/huur9oubvhlwi9sqw0go.jpg' },
-  { id: '4', image: 'https://res.cloudinary.com/manish19/image/upload/v1726505860/huur9oubvhlwi9sqw0go.jpg' },
+  {
+    id: "1",
+    image:
+      "https://res.cloudinary.com/manish19/image/upload/v1726505860/huur9oubvhlwi9sqw0go.jpg",
+  },
+  {
+    id: "2",
+    image:
+      "https://res.cloudinary.com/manish19/image/upload/v1726505860/huur9oubvhlwi9sqw0go.jpg",
+  },
   // Add more images as needed
 ];
 
+const reels = [
+  {
+    id: "1",
+    image:
+      "https://res.cloudinary.com/manish19/image/upload/v1726506341/ftedkmcuqzwy97jwjdqu.jpg",
+  },
+  {
+    id: "2",
+    image:
+      "https://res.cloudinary.com/manish19/image/upload/v1726506341/ftedkmcuqzwy97jwjdqu.jpg",
+  },
+  // Add more reel images as needed
+];
+
+const tagged = [
+  {
+    id: "1",
+    image:
+      "https://res.cloudinary.com/manish19/image/upload/v1726506341/ftedkmcuqzwy97jwjdqu.jpg",
+  },
+  {
+    id: "2",
+    image:
+      "https://res.cloudinary.com/manish19/image/upload/v1726506341/ftedkmcuqzwy97jwjdqu.jpg",
+  },
+  // Add more tagged images
+];
+
 export default function Profile() {
+  const userData = useSelector((state: any) => state.Profile.userData);
+
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const [activeTab, setActiveTab] = useState("Posts");
+
   const renderPost = ({ item }: { item: { id: string; image: string } }) => (
     <Image source={{ uri: item.image }} style={styles.postImage} />
   );
 
+  const getData = () => {
+    switch (activeTab) {
+      case "Posts":
+        return posts;
+      case "Reels":
+        return reels;
+      case "Tagged":
+        return tagged;
+      default:
+        return [];
+    }
+  };
+
   return (
     <View style={styles.container}>
+      {/* Header with username and icon */}
+      <View
+        style={{ marginTop: 43, flexDirection: "row", alignItems: "center" }}
+      >
+        <Text style={styles.profileUsername}>Manish keer</Text>
+        <EntypoIcons name="chevron-small-down" color={"white"} size={28} />
+      </View>
+
       {/* Profile Header */}
       <View style={styles.header}>
         <View style={styles.profileInfo}>
@@ -27,7 +99,7 @@ export default function Profile() {
             <Image
               style={styles.profileImage}
               source={{
-                uri: "https://res.cloudinary.com/manish19/image/upload/v1726506341/ftedkmcuqzwy97jwjdqu.jpg", // Your Cloudinary image
+                uri: "https://res.cloudinary.com/manish19/image/upload/v1726506341/ftedkmcuqzwy97jwjdqu.jpg",
               }}
             />
           </View>
@@ -46,12 +118,24 @@ export default function Profile() {
             <Text style={styles.statsLabel}>Following</Text>
           </View>
         </View>
-        <Text style={styles.username}>Manish Keer</Text>
-        <Text style={styles.bio}>I am a MERN stack developer</Text>
+        <View style={{ marginTop:10, marginBottom:10}}>
+          {userData.username && (
+            <Text style={styles.bio}>{userData.username}</Text>
+          )}
+          {userData.bio && <Text style={styles.bio}>{userData.bio}</Text>}
+          {userData.pronoun && (
+            <Text style={styles.bio}>{userData.pronoun}</Text>
+          )}
+        </View>
 
         {/* Buttons */}
         <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.editProfileButton}>
+          <TouchableOpacity
+            style={styles.editProfileButton}
+            onPress={() => {
+              navigation.navigate("EditProfile");
+            }}
+          >
             <Text style={styles.buttonText}>Edit Profile</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.archiveButton}>
@@ -61,24 +145,52 @@ export default function Profile() {
         </View>
       </View>
 
-      {/* Posts Grid */}
+      {/* Tab Section */}
+      <View style={styles.tabContainer}>
+        <TouchableOpacity
+          onPress={() => setActiveTab("Posts")}
+          style={activeTab === "Posts" ? styles.activeTab : styles.tab}
+        >
+          <Ionicons name="grid-outline" size={20} color="white" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => setActiveTab("Reels")}
+          style={activeTab === "Reels" ? styles.activeTab : styles.tab}
+        >
+          <Ionicons name="play-circle-outline" size={20} color="white" />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => setActiveTab("Tagged")}
+          style={activeTab === "Tagged" ? styles.activeTab : styles.tab}
+        >
+          <Ionicons name="person-outline" size={20} color="white" />
+        </TouchableOpacity>
+      </View>
+
+      {/* Posts/Reels/Tagged Grid */}
       <FlatList
-        data={posts}
+        data={getData()}
         renderItem={renderPost}
         keyExtractor={(item) => item.id}
-        numColumns={3} // Display posts in grid format
+        numColumns={3}
         style={styles.postsContainer}
       />
-      <Footer/>
+      <Footer />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    minHeight: "100%",
     backgroundColor: "black",
-    paddingTop: 50,
+    paddingTop: 10,
+  },
+  profileUsername: {
+    color: "white",
+    fontWeight: "bold",
+    fontSize: 20,
+    marginLeft: 14,
   },
   header: {
     padding: 20,
@@ -95,9 +207,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   profileImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 90,
+    height: 90,
+    borderRadius: 45,
   },
   statsContainer: {
     alignItems: "center",
@@ -120,7 +232,7 @@ const styles = StyleSheet.create({
   bio: {
     fontSize: 14,
     color: "gray",
-    marginBottom: 10,
+    marginBottom: 4,
   },
   buttonContainer: {
     flexDirection: "row",
@@ -149,11 +261,28 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   postsContainer: {
-    flex: 1,
+    minHeight: 200,
   },
   postImage: {
     width: "33%",
-    height: 120,
-    margin: 1,
+    height: 140,
+    margin: 3,
+    borderRadius: 4,
+  },
+  tabContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  tab: {
+    alignItems: "center",
+    padding: 10,
+  },
+  activeTab: {
+    alignItems: "center",
+    padding: 10,
+    borderBottomWidth: 2,
+    borderBottomColor: "white",
   },
 });
